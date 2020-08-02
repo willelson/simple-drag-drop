@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
-import './App.css';
 import { DragDropContext, DropResult, Droppable } from 'react-beautiful-dnd';
-import styled from 'styled-components';
 
-import TaskList from './components/TaskList';
+import './App.css';
+
 import Task from './components/Task';
-
 import { randomID } from './helpers';
 
 export interface ITask {
@@ -33,10 +31,26 @@ const initialState = [
 ];
 
 function App() {
-  const dragEnd = (result: DropResult) => {
-    console.log('drag end');
-  };
   const [tasks, setTasks] = useState<ITask[]>(initialState);
+
+  const dragEnd = (result: DropResult) => {
+    const { source, destination, draggableId } = result;
+
+    if (destination) {
+      // copy task list from state without task to move
+      let updatedTasks = tasks.filter((task) => task.id !== draggableId);
+
+      // insert task into copied list at it's new position
+      updatedTasks = [
+        ...updatedTasks.slice(0, destination.index),
+        tasks[source.index],
+        ...updatedTasks.slice(destination.index)
+      ];
+
+      setTasks(updatedTasks);
+    }
+  };
+
   return (
     <div className={'container'}>
       <h3>Tasks</h3>
